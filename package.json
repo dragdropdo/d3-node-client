@@ -1,11 +1,37 @@
 {
   "name": "d3-node-client",
   "version": "1.0.0",
-  "description": "NodeJS Client To Use D3 Client APIs",
-  "main": "index.js",
+  "description": "Official Node.js client library for the D3 Business API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "d3",
+    "file-conversion",
+    "api-client",
+    "file-processing",
+    "pdf",
+    "convert",
+    "compress"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
