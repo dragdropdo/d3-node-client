@@ -1,5 +1,8 @@
 import nock from "nock";
 import { D3Client } from "../src";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 const API_BASE = "https://api.d3.com";
 
@@ -16,13 +19,25 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
     if (!nock.isDone()) {
       const pending = nock.pendingMocks();
       nock.cleanAll();
-      throw new Error(`Not all HTTP mocks were satisfied: ${pending.join(", ")}`);
+      throw new Error(
+        `Not all HTTP mocks were satisfied: ${pending.join(", ")}`
+      );
     }
     nock.cleanAll();
   });
 
-  test("uploads a file (Buffer) with multipart flow", async () => {
+  test("uploads a file (path) with multipart flow", async () => {
     const client = new D3Client({ apiKey: "test-key", baseURL: API_BASE });
+
+    const tmpFile = path.join(os.tmpdir(), `d3-test-${Date.now()}.pdf`);
+    const sixMbContent = "a".repeat(6 * 1024 * 1024);
+    fs.writeFileSync(tmpFile, sixMbContent);
+
+    const cleanup = () => {
+      if (fs.existsSync(tmpFile)) {
+        fs.unlinkSync(tmpFile);
+      }
+    };
 
     nock(API_BASE)
       .post("/v1/external/upload", (body) => {
@@ -46,14 +61,17 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
     nock("https://upload.d3.com").put("/part1").reply(200, {});
     nock("https://upload.d3.com").put("/part2").reply(200, {});
 
-    const sixMbBuffer = Buffer.from("a".repeat(6 * 1024 * 1024));
-
-    const result = await client.uploadFile({
-      file: sixMbBuffer,
-      fileName: "test.pdf",
-      mimeType: "application/pdf",
-      parts: 2,
-    });
+    let result;
+    try {
+      result = await client.uploadFile({
+        file: tmpFile,
+        fileName: "test.pdf",
+        mimeType: "application/pdf",
+        parts: 2,
+      });
+    } finally {
+      cleanup();
+    }
 
     expect(result.fileKey).toBe("file-key-123");
     expect(result.presignedUrls).toHaveLength(2);
@@ -106,4 +124,3 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
     expect(status.filesData[0].downloadLink).toContain("files.d3.com");
   });
 });
-

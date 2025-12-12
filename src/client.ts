@@ -5,13 +5,6 @@
  * Provides methods for file uploads, operations, and status checking.
  */
 
-// Type declarations for Node.js globals
-declare const Buffer:
-  | {
-      isBuffer(obj: any): boolean;
-    }
-  | undefined;
-
 // Import statements - these will resolve when dependencies are installed
 // @ts-ignore - Module resolution will work at runtime with installed dependencies
 import axios, { AxiosInstance } from "axios";
@@ -129,14 +122,6 @@ export class D3Client {
    *   }
    * });
    * console.log('File key:', result.fileKey);
-   *
-   * // Upload from Buffer
-   * const buffer = fs.readFileSync('/path/to/file.pdf');
-   * const result = await client.uploadFile({
-   *   file: buffer,
-   *   fileName: 'document.pdf',
-   *   mimeType: 'application/pdf'
-   * });
    * ```
    */
   async uploadFile(options: UploadFileOptions): Promise<UploadResponse> {
@@ -149,26 +134,16 @@ export class D3Client {
     // Determine file size
     let fileSize: number;
 
-    if (typeof file === "string") {
-      // File path
-      if (!fs.existsSync(file)) {
-        throw new D3ValidationError(`File not found: ${file}`);
-      }
-      const stats = fs.statSync(file);
-      fileSize = stats.size;
-    } else if (
-      typeof Buffer !== "undefined" &&
-      Buffer.isBuffer &&
-      Buffer.isBuffer(file)
-    ) {
-      // Buffer
-      fileSize = (file as any).length;
-    } else {
-      // Streams not directly supported - need to buffer first
-      throw new D3ValidationError(
-        "Stream uploads are not supported. Please use file path or Buffer."
-      );
+    if (typeof file !== "string") {
+      throw new D3ValidationError("file must be a file path string");
     }
+
+    if (!fs.existsSync(file)) {
+      throw new D3ValidationError(`File not found: ${file}`);
+    }
+
+    const stats = fs.statSync(file);
+    fileSize = stats.size;
 
     // Calculate parts if not provided
     const chunkSize = 5 * 1024 * 1024; // 5MB per part
@@ -206,29 +181,16 @@ export class D3Client {
       let bytesUploaded = 0;
 
       // Prepare file data for chunking
-      let fileBuffer: any; // Buffer type from Node.js
-      if (typeof file === "string") {
-        // Read entire file into buffer for chunking
-        fileBuffer = fs.readFileSync(file);
-      } else if (
-        typeof Buffer !== "undefined" &&
-        Buffer.isBuffer &&
-        Buffer.isBuffer(file)
-      ) {
-        fileBuffer = file;
-      } else {
-        throw new D3ValidationError(
-          "Stream uploads are not supported. Please use file path or Buffer."
-        );
-      }
+      // Read entire file into memory for chunking (path-only uploads supported)
+      const fileBuffer = fs.readFileSync(file);
 
       for (let i = 0; i < actualParts; i++) {
         const start = i * chunkSizePerPart;
         const end = Math.min(start + chunkSizePerPart, fileSize);
         const partSize = end - start;
 
-        // Extract chunk from buffer
-        const chunk = fileBuffer.slice(start, end);
+        // Extract chunk from buffer (use subarray to avoid deprecated slice)
+        const chunk = fileBuffer.subarray(start, end);
 
         // Upload chunk
         await axios.put(presignedUrls[i], chunk, {

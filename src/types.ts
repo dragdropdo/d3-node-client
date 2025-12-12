@@ -14,8 +14,8 @@ export interface D3ClientConfig {
 }
 
 export interface UploadFileOptions {
-  /** File path or Buffer (from Node.js) */
-  file: string | any; // Buffer type from Node.js
+  /** File path (absolute or relative) */
+  file: string;
   /** Original file name */
   fileName: string;
   /** MIME type of the file */

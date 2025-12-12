@@ -43,7 +43,6 @@ new D3Client(config: D3ClientConfig)
 
 **Key Features**:
 
-- Supports file paths and Buffers
 - Automatic multipart upload for large files
 - Progress tracking via callback
 - Automatic MIME type detection
@@ -54,7 +53,7 @@ new D3Client(config: D3ClientConfig)
 - **Single method for all uploads**: Simplifies API surface
 - **Automatic multipart handling**: Developers don't need to manage presigned URLs manually
 - **Progress callback**: Allows UI updates during upload
-- **File path and Buffer support**: Covers most common use cases
+- **File path support**: Uploads use a file path; Buffers are not supported
 
 **Example**:
 

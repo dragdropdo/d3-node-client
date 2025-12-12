@@ -103,7 +103,7 @@ Upload a file to D3 storage. This method handles the complete upload flow includ
 
 **Parameters:**
 
-- `options.file` (required) - File path (string) or Buffer
+- `options.file` (required) - File path (string)
 - `options.fileName` (required) - Original file name
 - `options.mimeType` (optional) - MIME type (auto-detected if not provided)
 - `options.parts` (optional) - Number of parts for multipart upload (auto-calculated if not provided)
@@ -124,10 +124,9 @@ const result = await client.uploadFile({
   },
 });
 
-// Upload from Buffer
-const buffer = fs.readFileSync("/path/to/file.pdf");
+// Upload from file path only (Buffer uploads are not supported)
 const result = await client.uploadFile({
-  file: buffer,
+  file: "/path/to/file.pdf",
   fileName: "document.pdf",
   mimeType: "application/pdf",
 });
