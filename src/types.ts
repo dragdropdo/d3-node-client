@@ -40,9 +40,17 @@ export interface UploadProgress {
 }
 
 export interface UploadResponse {
-  /** File key for use in operations */
+  /** File key for use in operations (snake_case from API) */
+  file_key: string;
+  /** Upload ID for completing the upload (snake_case from API) */
+  upload_id: string;
+  /** Presigned URLs for multipart upload (snake_case from API) */
+  presigned_urls: string[];
+  /** File key for use in operations (camelCase alias) */
   fileKey: string;
-  /** Presigned URLs for multipart upload */
+  /** Upload ID for completing the upload (camelCase alias) */
+  uploadId: string;
+  /** Presigned URLs for multipart upload (camelCase alias) */
   presignedUrls: string[];
 }
 

@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-const API_BASE = "https://api.d3.com";
+const API_BASE = "https://api-dev.dragdropdo.com";
 
 describe("D3Client end-to-end (mocked HTTP)", () => {
   beforeAll(() => {
@@ -50,16 +50,41 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
       })
       .reply(200, {
         data: {
-          fileKey: "file-key-123",
-          presignedUrls: [
+          file_key: "file-key-123",
+          upload_id: "upload-id-456",
+          presigned_urls: [
             "https://upload.d3.com/part1",
             "https://upload.d3.com/part2",
           ],
         },
       });
 
-    nock("https://upload.d3.com").put("/part1").reply(200, {});
-    nock("https://upload.d3.com").put("/part2").reply(200, {});
+    nock("https://upload.d3.com")
+      .put("/part1")
+      .reply(200, {}, { ETag: '"etag-part-1"' });
+    nock("https://upload.d3.com")
+      .put("/part2")
+      .reply(200, {}, { ETag: '"etag-part-2"' });
+
+    nock(API_BASE)
+      .post("/v1/external/complete-upload", (body) => {
+        return (
+          body.file_key === "file-key-123" &&
+          body.upload_id === "upload-id-456" &&
+          Array.isArray(body.parts) &&
+          body.parts.length === 2 &&
+          body.parts[0].etag === "etag-part-1" &&
+          body.parts[0].part_number === 1 &&
+          body.parts[1].etag === "etag-part-2" &&
+          body.parts[1].part_number === 2
+        );
+      })
+      .reply(200, {
+        data: {
+          message: "Upload completed successfully",
+          file_key: "file-key-123",
+        },
+      });
 
     let result;
     try {
@@ -74,6 +99,7 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
     }
 
     expect(result.fileKey).toBe("file-key-123");
+    expect(result.uploadId).toBe("upload-id-456");
     expect(result.presignedUrls).toHaveLength(2);
   });
 

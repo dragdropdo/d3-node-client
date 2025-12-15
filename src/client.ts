@@ -168,7 +168,10 @@ export class D3Client {
         parts: actualParts,
       });
 
-      const { fileKey, presignedUrls } = uploadResponse.data.data;
+      const uploadData = uploadResponse.data.data;
+      const fileKey = uploadData.file_key;
+      const uploadId = uploadData.upload_id;
+      const presignedUrls = uploadData.presigned_urls;
 
       if (presignedUrls.length !== actualParts) {
         throw new D3UploadError(
@@ -176,9 +179,14 @@ export class D3Client {
         );
       }
 
-      // Step 2: Upload file parts
+      if (!uploadId) {
+        throw new D3UploadError("Upload ID not received from server");
+      }
+
+      // Step 2: Upload file parts and capture ETags
       const chunkSizePerPart = Math.ceil(fileSize / actualParts);
       let bytesUploaded = 0;
+      const uploadParts: Array<{ etag: string; partNumber: number }> = [];
 
       // Prepare file data for chunking
       // Read entire file into memory for chunking (path-only uploads supported)
@@ -192,13 +200,25 @@ export class D3Client {
         // Extract chunk from buffer (use subarray to avoid deprecated slice)
         const chunk = fileBuffer.subarray(start, end);
 
-        // Upload chunk
-        await axios.put(presignedUrls[i], chunk, {
+        // Upload chunk and capture ETag from response headers
+        const putResponse = await axios.put(presignedUrls[i], chunk, {
           headers: {
             "Content-Type": detectedMimeType,
           },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
+        });
+
+        // Extract ETag from response (ETag may be quoted, so we'll store it as-is)
+        const etag =
+          putResponse.headers.etag || putResponse.headers["ETag"] || "";
+        if (!etag) {
+          throw new D3UploadError(`Failed to get ETag for part ${i + 1}`);
+        }
+
+        uploadParts.push({
+          etag: etag.replace(/^"|"$/g, ""), // Remove quotes if present
+          partNumber: i + 1,
         });
 
         bytesUploaded += partSize;
@@ -215,7 +235,47 @@ export class D3Client {
         }
       }
 
-      return { fileKey, presignedUrls };
+      // Step 3: Complete the multipart upload
+      // Note: The backend CompleteUpload handler looks up the upload entry by upload_id,
+      // so it should be able to derive object_name internally. If the backend requires
+      // object_name in the request, the ExternalUploadResponse should be updated to include it.
+      try {
+        await this.axiosInstance.post<{
+          data: { message: string; file_key: string };
+        }>("/v1/external/complete-upload", {
+          file_key: fileKey,
+          upload_id: uploadId,
+          parts: uploadParts.map((part) => ({
+            etag: part.etag,
+            part_number: part.partNumber,
+          })),
+        });
+      } catch (completeError: any) {
+        if (
+          completeError instanceof D3ClientError ||
+          completeError instanceof D3APIError
+        ) {
+          throw new D3UploadError(
+            `Failed to complete upload: ${completeError.message}`,
+            completeError
+          );
+        }
+        const message = completeError?.message || "Unknown error";
+        throw new D3UploadError(
+          `Failed to complete upload: ${message}`,
+          completeError
+        );
+      }
+
+      return {
+        file_key: fileKey,
+        upload_id: uploadId,
+        presigned_urls: presignedUrls,
+        // Provide camelCase aliases for backward compatibility
+        fileKey,
+        uploadId,
+        presignedUrls,
+      };
     } catch (error: any) {
       if (error instanceof D3ClientError || error instanceof D3APIError) {
         throw error;

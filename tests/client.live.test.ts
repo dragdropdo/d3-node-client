@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-const API_BASE = process.env.D3_BASE_URL ?? "https://api.d3.com";
+const API_BASE = process.env.D3_BASE_URL ?? "https://api-dev.dragdropdo.com";
 const API_KEY = process.env.D3_API_KEY;
 const RUN_LIVE = process.env.RUN_LIVE_TESTS === "1";
 
@@ -20,10 +20,14 @@ if (!RUN_LIVE || !API_KEY) {
 }
 
 maybeDescribe("D3Client live API", () => {
-  const client = new D3Client({ apiKey: API_KEY!, baseURL: API_BASE });
   const log = (...args: unknown[]) => console.log("[live-test]", ...args);
 
   test("upload, convert, poll, download", async () => {
+    if (!API_KEY) {
+      throw new Error("API_KEY is required for live tests");
+    }
+
+    const client = new D3Client({ apiKey: API_KEY, baseURL: API_BASE });
     const tmpFile = path.join(os.tmpdir(), `d3-live-${Date.now()}.txt`);
     fs.writeFileSync(tmpFile, "hello world");
 
@@ -37,7 +41,10 @@ maybeDescribe("D3Client live API", () => {
     log("Upload result:", upload);
 
     log("Starting convert...");
-    const operation = await client.convert([upload.fileKey], "png");
+    const operation = await client.convert(
+      [upload.fileKey || upload.file_key],
+      "png"
+    );
     log("Operation:", operation);
 
     log("Polling status...");
