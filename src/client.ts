@@ -47,7 +47,7 @@ export class D3Client {
    * ```typescript
    * const client = new D3Client({
    *   apiKey: 'your-api-key',
-   *   baseURL: 'https://api.d3.com',
+   *   baseURL: 'https://api-dev.dragdropdo.com',
    *   timeout: 30000
    * });
    * ```
@@ -58,7 +58,7 @@ export class D3Client {
     }
 
     this.apiKey = config.apiKey;
-    this.baseURL = config.baseURL || "https://api.d3.com";
+    this.baseURL = config.baseURL || "https://api-dev.dragdropdo.com";
     this.timeout = config.timeout || 30000;
 
     // Remove trailing slash from baseURL
@@ -70,7 +70,7 @@ export class D3Client {
       timeout: this.timeout,
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": this.apiKey,
+        Authorization: `Bearer ${this.apiKey}`,
         ...config.headers,
       },
     });
@@ -161,7 +161,7 @@ export class D3Client {
       // Step 1: Request presigned URLs
       const uploadResponse = await this.axiosInstance.post<{
         data: UploadResponse;
-      }>("/v1/external/upload", {
+      }>("/v1/biz/initiate-upload", {
         file_name: fileName,
         size: fileSize,
         mime_type: detectedMimeType,
@@ -242,7 +242,7 @@ export class D3Client {
       try {
         await this.axiosInstance.post<{
           data: { message: string; file_key: string };
-        }>("/v1/external/complete-upload", {
+        }>("/v1/biz/complete-upload", {
           file_key: fileKey,
           upload_id: uploadId,
           parts: uploadParts.map((part) => ({
@@ -325,7 +325,7 @@ export class D3Client {
     try {
       const response = await this.axiosInstance.post<{
         data: SupportedOperationResponse;
-      }>("/v1/external/supported-operation", {
+      }>("/v1/biz/supported-operation", {
         ext: options.ext,
         action: options.action,
         parameters: options.parameters,
@@ -393,12 +393,14 @@ export class D3Client {
     try {
       const response = await this.axiosInstance.post<{
         data: OperationResponse;
-      }>("/v1/external/do", {
+      }>("/v1/biz/do", {
         action: options.action,
         file_keys: options.fileKeys,
         parameters: options.parameters,
         notes: options.notes,
       });
+
+      console.log("response", response.data);
 
       return response.data.data;
     } catch (error: any) {
@@ -571,7 +573,7 @@ export class D3Client {
     }
 
     try {
-      let url = `/v1/external/status/${options.mainTaskId}`;
+      let url = `/v1/biz/status/${options.mainTaskId}`;
       if (options.fileTaskId) {
         url += `/${options.fileTaskId}`;
       }

@@ -5,7 +5,7 @@ import * as os from "os";
 import * as path from "path";
 
 const API_BASE = process.env.D3_BASE_URL ?? "https://api-dev.dragdropdo.com";
-const API_KEY = process.env.D3_API_KEY;
+const API_KEY = process.env.D3_API_KEY ?? "";
 const RUN_LIVE = process.env.RUN_LIVE_TESTS === "1";
 
 // Skip unless explicitly enabled with RUN_LIVE_TESTS=1 and a real API key.

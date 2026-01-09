@@ -5,7 +5,7 @@
 export interface D3ClientConfig {
   /** API key for authentication */
   apiKey: string;
-  /** Base URL of the D3 API (e.g., 'https://api.d3.com') */
+  /** Base URL of the D3 API (e.g., 'https://api-dev.dragdropdo.com') */
   baseURL?: string;
   /** Request timeout in milliseconds (default: 30000) */
   timeout?: number;
