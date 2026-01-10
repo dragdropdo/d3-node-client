@@ -168,10 +168,13 @@ export class D3Client {
         parts: actualParts,
       });
 
-      const uploadData = uploadResponse.data.data;
-      const fileKey = uploadData.file_key;
-      const uploadId = uploadData.upload_id;
-      const presignedUrls = uploadData.presigned_urls;
+      const rawData = uploadResponse.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      const fileKey = transformed.fileKey || transformed.file_key;
+      const uploadId = transformed.uploadId || transformed.upload_id;
+      const presignedUrls =
+        transformed.presignedUrls || transformed.presigned_urls || [];
 
       if (presignedUrls.length !== actualParts) {
         throw new D3UploadError(
@@ -272,9 +275,9 @@ export class D3Client {
         upload_id: uploadId,
         presigned_urls: presignedUrls,
         // Provide camelCase aliases for backward compatibility
-        fileKey,
-        uploadId,
-        presignedUrls,
+        fileKey: fileKey,
+        uploadId: uploadId,
+        presignedUrls: presignedUrls,
       };
     } catch (error: any) {
       if (error instanceof D3ClientError || error instanceof D3APIError) {
@@ -400,9 +403,12 @@ export class D3Client {
         notes: options.notes,
       });
 
-      console.log("response", response.data);
-
-      return response.data.data;
+      const rawData = response.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      return {
+        mainTaskId: transformed.mainTaskId || transformed.main_task_id,
+      };
     } catch (error: any) {
       if (error instanceof D3ClientError || error instanceof D3APIError) {
         throw error;
@@ -578,10 +584,23 @@ export class D3Client {
         url += `/${options.fileTaskId}`;
       }
 
-      const response = await this.axiosInstance.get<{ data: StatusResponse }>(
-        url
-      );
-      return response.data.data;
+      const response = await this.axiosInstance.get<{ data: any }>(url);
+      const rawData = response.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      return {
+        operationStatus:
+          transformed.operationStatus || transformed.operation_status,
+        filesData: (transformed.filesData || transformed.files_data || []).map(
+          (file: any) => ({
+            fileKey: file.fileKey || file.file_key,
+            status: file.status,
+            downloadLink: file.downloadLink || file.download_link,
+            errorCode: file.errorCode || file.error_code,
+            errorMessage: file.errorMessage || file.error_message,
+          })
+        ),
+      };
     } catch (error: any) {
       if (error instanceof D3ClientError || error instanceof D3APIError) {
         throw error;
@@ -666,6 +685,33 @@ export class D3Client {
 
       poll();
     });
+  }
+
+  /**
+   * Convert snake_case object keys to camelCase
+   */
+  private toCamelCase(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.toCamelCase(item));
+    }
+    if (typeof obj === "object") {
+      const camelObj: any = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
+            letter.toUpperCase()
+          );
+          camelObj[camelKey] = this.toCamelCase(obj[key]);
+          // Also keep original key for backward compatibility
+          camelObj[key] = obj[key];
+        }
+      }
+      return camelObj;
+    }
+    return obj;
   }
 
   /**

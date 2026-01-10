@@ -48,15 +48,22 @@ maybeDescribe("D3Client live API", () => {
     log("Operation:", operation);
 
     log("Polling status...");
+    const mainTaskId = operation.mainTaskId || (operation as any).main_task_id;
+    if (!mainTaskId) {
+      throw new Error("mainTaskId not found in operation response");
+    }
     const status = await client.pollStatus({
-      mainTaskId: operation.mainTaskId,
+      mainTaskId: mainTaskId,
       interval: 3_000,
       timeout: 60_000,
     });
     log("Final status:", status);
 
-    expect(status.operationStatus).toBe("completed");
-    const link = status.filesData[0]?.downloadLink;
+    const opStatus = status.operationStatus || (status as any).operation_status;
+    expect(opStatus).toBe("completed");
+    const filesData = status.filesData || (status as any).files_data || [];
+    const link =
+      filesData[0]?.downloadLink || (filesData[0] as any)?.download_link;
     expect(link).toBeTruthy();
 
     if (link) {
