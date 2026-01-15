@@ -175,6 +175,7 @@ export class D3Client {
       const uploadId = transformed.uploadId || transformed.upload_id;
       const presignedUrls =
         transformed.presignedUrls || transformed.presigned_urls || [];
+      const objectName = transformed.objectName || transformed.object_name;
 
       if (presignedUrls.length !== actualParts) {
         throw new D3UploadError(
@@ -239,15 +240,13 @@ export class D3Client {
       }
 
       // Step 3: Complete the multipart upload
-      // Note: The backend CompleteUpload handler looks up the upload entry by upload_id,
-      // so it should be able to derive object_name internally. If the backend requires
-      // object_name in the request, the ExternalUploadResponse should be updated to include it.
       try {
         await this.axiosInstance.post<{
           data: { message: string; file_key: string };
         }>("/v1/biz/complete-upload", {
           file_key: fileKey,
           upload_id: uploadId,
+          object_name: objectName,
           parts: uploadParts.map((part) => ({
             etag: part.etag,
             part_number: part.partNumber,
@@ -274,10 +273,12 @@ export class D3Client {
         file_key: fileKey,
         upload_id: uploadId,
         presigned_urls: presignedUrls,
+        object_name: objectName,
         // Provide camelCase aliases for backward compatibility
         fileKey: fileKey,
         uploadId: uploadId,
         presignedUrls: presignedUrls,
+        objectName: objectName,
       };
     } catch (error: any) {
       if (error instanceof D3ClientError || error instanceof D3APIError) {

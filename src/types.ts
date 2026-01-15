@@ -46,12 +46,16 @@ export interface UploadResponse {
   upload_id: string;
   /** Presigned URLs for multipart upload (snake_case from API) */
   presigned_urls: string[];
+  /** Object name returned by the API (snake_case from API) */
+  object_name?: string;
   /** File key for use in operations (camelCase alias) */
   fileKey: string;
   /** Upload ID for completing the upload (camelCase alias) */
   uploadId: string;
   /** Presigned URLs for multipart upload (camelCase alias) */
   presignedUrls: string[];
+  /** Object name returned by the API (camelCase alias) */
+  objectName?: string;
 }
 
 export interface SupportedOperationOptions {
