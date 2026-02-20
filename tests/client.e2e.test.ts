@@ -1,12 +1,12 @@
 import nock from "nock";
-import { D3Client } from "../src";
+import { Dragdropdo } from "../src";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
 const API_BASE = "https://api-dev.dragdropdo.com";
 
-describe("D3Client end-to-end (mocked HTTP)", () => {
+describe("Dragdropdo end-to-end (mocked HTTP)", () => {
   beforeAll(() => {
     nock.disableNetConnect();
   });
@@ -27,7 +27,7 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
   });
 
   test("uploads a file (path) with multipart flow", async () => {
-    const client = new D3Client({ apiKey: "test-key", baseURL: API_BASE });
+    const client = new Dragdropdo({ apiKey: "test-key", baseURL: API_BASE });
 
     const tmpFile = path.join(os.tmpdir(), `d3-test-${Date.now()}.pdf`);
     const sixMbContent = "a".repeat(6 * 1024 * 1024);
@@ -104,7 +104,7 @@ describe("D3Client end-to-end (mocked HTTP)", () => {
   });
 
   test("creates an operation and polls status to completion", async () => {
-    const client = new D3Client({ apiKey: "test-key", baseURL: API_BASE });
+    const client = new Dragdropdo({ apiKey: "test-key", baseURL: API_BASE });
 
     nock(API_BASE)
       .post("/v1/external/do", {

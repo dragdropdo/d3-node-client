@@ -1,4 +1,4 @@
-# D3 Node.js Client
+# DragDropDo SDK - Node.js
 
 Official Node.js client library for the D3 Business API. This library provides a simple and elegant interface for developers to interact with D3's file processing services.
 
@@ -15,16 +15,16 @@ Official Node.js client library for the D3 Business API. This library provides a
 ## Installation
 
 ```bash
-npm install d3-node-client
+npm install dragdropdo-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { D3Client } from "d3-node-client";
+import { Dragdropdo } from "dragdropdo-sdk";
 
 // Initialize the client
-const client = new D3Client({
+const client = new Dragdropdo({
   apiKey: "your-api-key-here",
   baseURL: "https://api.d3.com", // Optional, defaults to https://api.d3.com
   timeout: 30000, // Optional, defaults to 30000ms
@@ -72,7 +72,7 @@ if (supported.supported) {
 
 ### Initialization
 
-#### `new D3Client(config: D3ClientConfig)`
+#### `new Dragdropdo(config: DragdropdoConfig)`
 
 Create a new D3 client instance.
 
@@ -86,7 +86,7 @@ Create a new D3 client instance.
 **Example:**
 
 ```typescript
-const client = new D3Client({
+const client = new Dragdropdo({
   apiKey: "your-api-key",
   baseURL: "https://api.d3.com",
   timeout: 30000,
@@ -376,12 +376,12 @@ if (status.operationStatus === "completed") {
 Here's a complete example showing the typical workflow:
 
 ```typescript
-import { D3Client } from "d3-node-client";
+import { Dragdropdo } from "dragdropdo-sdk";
 import * as fs from "fs";
 
 async function processFile() {
   // Initialize client
-  const client = new D3Client({
+  const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY!,
     baseURL: "https://api.d3.com",
   });
@@ -465,7 +465,7 @@ processFile();
 The client provides several error types for better error handling:
 
 ```typescript
-import { D3ClientError, D3APIError, D3ValidationError, D3UploadError, D3TimeoutError } from 'd3-node-client';
+import { DragdropdoError, D3APIError, D3ValidationError, D3UploadError, D3TimeoutError } from 'dragdropdo-sdk';
 
 try {
   await client.uploadFile({ ... });
@@ -604,15 +604,15 @@ The library is written in TypeScript and includes full type definitions. All typ
 
 ```typescript
 import {
-  D3Client,
-  D3ClientConfig,
+  Dragdropdo,
+  DragdropdoConfig,
   UploadFileOptions,
   UploadResponse,
   OperationOptions,
   OperationResponse,
   StatusResponse,
   // ... and more
-} from "d3-node-client";
+} from "dragdropdo-sdk";
 ```
 
 ---

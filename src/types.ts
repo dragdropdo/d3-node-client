@@ -2,7 +2,7 @@
  * Type definitions for D3 Business API Client
  */
 
-export interface D3ClientConfig {
+export interface DragdropdoConfig {
   /** API key for authentication */
   apiKey: string;
   /** Base URL of the D3 API (e.g., 'https://api-dev.dragdropdo.com') */

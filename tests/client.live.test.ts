@@ -1,5 +1,5 @@
 import axios from "axios";
-import { D3Client } from "../src";
+import { Dragdropdo } from "../src";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -19,7 +19,7 @@ if (!RUN_LIVE || !API_KEY) {
   );
 }
 
-maybeDescribe("D3Client live API", () => {
+maybeDescribe("Dragdropdo live API", () => {
   const log = (...args: unknown[]) => console.log("[live-test]", ...args);
 
   test("upload, convert, poll, download", async () => {
@@ -27,7 +27,7 @@ maybeDescribe("D3Client live API", () => {
       throw new Error("API_KEY is required for live tests");
     }
 
-    const client = new D3Client({ apiKey: API_KEY, baseURL: API_BASE });
+    const client = new Dragdropdo({ apiKey: API_KEY, baseURL: API_BASE });
     const tmpFile = path.join(os.tmpdir(), `d3-live-${Date.now()}.txt`);
     fs.writeFileSync(tmpFile, "hello world");
 

@@ -4,7 +4,7 @@
  * This file demonstrates common usage patterns for the D3 client library.
  */
 
-import { D3Client, D3APIError, D3ValidationError } from "../src";
+import { Dragdropdo, D3APIError, D3ValidationError } from "../src";
 
 // Type declarations for Node.js globals (for linter)
 // These are available at runtime in Node.js
@@ -22,7 +22,7 @@ declare const module: any;
 
 async function basicExample() {
   // Initialize the client
-  const client = new D3Client({
+  const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY || "your-api-key-here",
     baseURL: "https://api.d3.com",
     timeout: 30000,
@@ -110,7 +110,7 @@ async function basicExample() {
 }
 
 async function compressExample() {
-  const client = new D3Client({
+  const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY || "your-api-key-here",
   });
 
@@ -152,7 +152,7 @@ async function compressExample() {
 }
 
 async function mergeExample() {
-  const client = new D3Client({
+  const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY || "your-api-key-here",
   });
 
@@ -193,7 +193,7 @@ async function mergeExample() {
 }
 
 async function pdfProtectionExample() {
-  const client = new D3Client({
+  const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY || "your-api-key-here",
   });
 

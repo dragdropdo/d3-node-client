@@ -1,5 +1,5 @@
 {
-  "name": "d3-node-client",
+  "name": "dragdropdo-sdk",
   "version": "1.0.0",
   "description": "Official Node.js client library for the D3 Business API",
   "main": "dist/index.js",

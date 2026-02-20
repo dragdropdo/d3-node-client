@@ -13,7 +13,7 @@ import * as fs from "fs";
 // @ts-ignore
 import * as path from "path";
 import {
-  D3ClientConfig,
+  DragdropdoConfig,
   UploadFileOptions,
   UploadResponse,
   SupportedOperationOptions,
@@ -26,14 +26,14 @@ import {
   FileTaskStatus,
 } from "./types";
 import {
-  D3ClientError,
+  DragdropdoError,
   D3APIError,
   D3ValidationError,
   D3UploadError,
   D3TimeoutError,
 } from "./errors";
 
-export class D3Client {
+export class Dragdropdo {
   private apiKey: string;
   private baseURL: string;
   private timeout: number;
@@ -45,14 +45,14 @@ export class D3Client {
    * @param config - Client configuration
    * @example
    * ```typescript
-   * const client = new D3Client({
+   * const client = new Dragdropdo({
    *   apiKey: 'your-api-key',
    *   baseURL: 'https://api-dev.dragdropdo.com',
    *   timeout: 30000
    * });
    * ```
    */
-  constructor(config: D3ClientConfig) {
+  constructor(config: DragdropdoConfig) {
     if (!config.apiKey) {
       throw new D3ValidationError("API key is required");
     }
@@ -89,11 +89,11 @@ export class D3Client {
           const code = data?.code;
           throw new D3APIError(message, status, code, data);
         } else if (error.request) {
-          throw new D3ClientError(
+          throw new DragdropdoError(
             "Network error: No response received from server"
           );
         } else {
-          throw new D3ClientError(`Request error: ${error.message}`);
+          throw new DragdropdoError(`Request error: ${error.message}`);
         }
       }
     );
@@ -254,7 +254,7 @@ export class D3Client {
         });
       } catch (completeError: any) {
         if (
-          completeError instanceof D3ClientError ||
+          completeError instanceof DragdropdoError ||
           completeError instanceof D3APIError
         ) {
           throw new D3UploadError(
@@ -281,7 +281,7 @@ export class D3Client {
         objectName: objectName,
       };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
@@ -337,11 +337,11 @@ export class D3Client {
 
       return response.data.data;
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to check supported operation: ${message}`,
         undefined,
         undefined,
@@ -411,11 +411,11 @@ export class D3Client {
         mainTaskId: transformed.mainTaskId || transformed.main_task_id,
       };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to create operation: ${message}`,
         undefined,
         undefined,
@@ -603,11 +603,11 @@ export class D3Client {
         ),
       };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to get status: ${message}`,
         undefined,
         undefined,
