@@ -15,13 +15,13 @@ Official Node.js client library for the D3 Business API. This library provides a
 ## Installation
 
 ```bash
-npm install d3-node-client
+npm install dragdropdo-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { D3Client } from "d3-node-client";
+import { D3Client } from "dragdropdo-sdk";
 
 // Initialize the client
 const client = new D3Client({
@@ -377,7 +377,7 @@ if (status.operationStatus === "completed") {
 Here's a complete example showing the typical workflow:
 
 ```typescript
-import { D3Client } from "d3-node-client";
+import { D3Client } from "dragdropdo-sdk";
 import * as fs from "fs";
 
 async function processFile() {
@@ -466,7 +466,7 @@ processFile();
 The client provides several error types for better error handling:
 
 ```typescript
-import { D3ClientError, D3APIError, D3ValidationError, D3UploadError, D3TimeoutError } from 'd3-node-client';
+import { D3ClientError, D3APIError, D3ValidationError, D3UploadError, D3TimeoutError } from 'dragdropdo-sdk';
 
 try {
   await client.uploadFile({ ... });
@@ -613,7 +613,7 @@ import {
   OperationResponse,
   StatusResponse,
   // ... and more
-} from "d3-node-client";
+} from "dragdropdo-sdk";
 ```
 
 ---

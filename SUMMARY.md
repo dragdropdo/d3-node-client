@@ -7,7 +7,7 @@ A complete Node.js client library for the D3 Business API that provides develope
 ## Project Structure
 
 ```
-d3-node-client/
+dragdropdo-sdk/
 ├── src/
 │   ├── index.ts          # Main entry point, exports all public APIs
 │   ├── client.ts         # Main D3Client class with all methods
@@ -150,7 +150,7 @@ All methods are fully typed with TypeScript:
 1. **Install Dependencies**
 
    ```bash
-   cd d3-node-client
+   cd dragdropdo-sdk
    npm install
    ```
 
