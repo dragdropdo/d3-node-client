@@ -53,7 +53,7 @@ Upload a file to D3 storage with automatic multipart handling.
 
 ```typescript
 {
-  file: string | Buffer;     // Required: File path or Buffer
+  file: string;              // Required: File path
   fileName: string;           // Required: Original file name
   mimeType?: string;         // Optional: MIME type (auto-detected if not provided)
   parts?: number;            // Optional: Number of parts (auto-calculated if not provided)
