@@ -107,7 +107,7 @@ if (status.operationStatus === "completed") {
 
 ### 1. **Single Upload Method**
 
-- Handles both file paths and Buffers
+- Handles file uploads from file paths (Buffer uploads not supported)
 - Automatic multipart upload for large files
 - Progress tracking built-in
 - Developers don't need to manage presigned URLs manually

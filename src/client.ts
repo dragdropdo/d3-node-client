@@ -5,13 +5,6 @@
  * Provides methods for file uploads, operations, and status checking.
  */
 
-// Type declarations for Node.js globals
-declare const Buffer:
-  | {
-      isBuffer(obj: any): boolean;
-    }
-  | undefined;
-
 // Import statements - these will resolve when dependencies are installed
 // @ts-ignore - Module resolution will work at runtime with installed dependencies
 import axios, { AxiosInstance } from "axios";
@@ -20,7 +13,7 @@ import * as fs from "fs";
 // @ts-ignore
 import * as path from "path";
 import {
-  D3ClientConfig,
+  DragdropdoConfig,
   UploadFileOptions,
   UploadResponse,
   SupportedOperationOptions,
@@ -33,14 +26,14 @@ import {
   FileTaskStatus,
 } from "./types";
 import {
-  D3ClientError,
+  DragdropdoError,
   D3APIError,
   D3ValidationError,
   D3UploadError,
   D3TimeoutError,
 } from "./errors";
 
-export class D3Client {
+export class Dragdropdo {
   private apiKey: string;
   private baseURL: string;
   private timeout: number;
@@ -52,20 +45,20 @@ export class D3Client {
    * @param config - Client configuration
    * @example
    * ```typescript
-   * const client = new D3Client({
+   * const client = new Dragdropdo({
    *   apiKey: 'your-api-key',
-   *   baseURL: 'https://api.d3.com',
+   *   baseURL: 'https://api-dev.dragdropdo.com',
    *   timeout: 30000
    * });
    * ```
    */
-  constructor(config: D3ClientConfig) {
+  constructor(config: DragdropdoConfig) {
     if (!config.apiKey) {
       throw new D3ValidationError("API key is required");
     }
 
     this.apiKey = config.apiKey;
-    this.baseURL = config.baseURL || "https://api.d3.com";
+    this.baseURL = config.baseURL || "https://api-dev.dragdropdo.com";
     this.timeout = config.timeout || 30000;
 
     // Remove trailing slash from baseURL
@@ -77,7 +70,7 @@ export class D3Client {
       timeout: this.timeout,
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": this.apiKey,
+        Authorization: `Bearer ${this.apiKey}`,
         ...config.headers,
       },
     });
@@ -96,11 +89,11 @@ export class D3Client {
           const code = data?.code;
           throw new D3APIError(message, status, code, data);
         } else if (error.request) {
-          throw new D3ClientError(
+          throw new DragdropdoError(
             "Network error: No response received from server"
           );
         } else {
-          throw new D3ClientError(`Request error: ${error.message}`);
+          throw new DragdropdoError(`Request error: ${error.message}`);
         }
       }
     );
@@ -129,14 +122,6 @@ export class D3Client {
    *   }
    * });
    * console.log('File key:', result.fileKey);
-   *
-   * // Upload from Buffer
-   * const buffer = fs.readFileSync('/path/to/file.pdf');
-   * const result = await client.uploadFile({
-   *   file: buffer,
-   *   fileName: 'document.pdf',
-   *   mimeType: 'application/pdf'
-   * });
    * ```
    */
   async uploadFile(options: UploadFileOptions): Promise<UploadResponse> {
@@ -149,26 +134,16 @@ export class D3Client {
     // Determine file size
     let fileSize: number;
 
-    if (typeof file === "string") {
-      // File path
-      if (!fs.existsSync(file)) {
-        throw new D3ValidationError(`File not found: ${file}`);
-      }
-      const stats = fs.statSync(file);
-      fileSize = stats.size;
-    } else if (
-      typeof Buffer !== "undefined" &&
-      Buffer.isBuffer &&
-      Buffer.isBuffer(file)
-    ) {
-      // Buffer
-      fileSize = (file as any).length;
-    } else {
-      // Streams not directly supported - need to buffer first
-      throw new D3ValidationError(
-        "Stream uploads are not supported. Please use file path or Buffer."
-      );
+    if (typeof file !== "string") {
+      throw new D3ValidationError("file must be a file path string");
     }
+
+    if (!fs.existsSync(file)) {
+      throw new D3ValidationError(`File not found: ${file}`);
+    }
+
+    const stats = fs.statSync(file);
+    fileSize = stats.size;
 
     // Calculate parts if not provided
     const chunkSize = 5 * 1024 * 1024; // 5MB per part
@@ -186,14 +161,21 @@ export class D3Client {
       // Step 1: Request presigned URLs
       const uploadResponse = await this.axiosInstance.post<{
         data: UploadResponse;
-      }>("/v1/external/upload", {
+      }>("/v1/biz/initiate-upload", {
         file_name: fileName,
         size: fileSize,
         mime_type: detectedMimeType,
         parts: actualParts,
       });
 
-      const { fileKey, presignedUrls } = uploadResponse.data.data;
+      const rawData = uploadResponse.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      const fileKey = transformed.fileKey || transformed.file_key;
+      const uploadId = transformed.uploadId || transformed.upload_id;
+      const presignedUrls =
+        transformed.presignedUrls || transformed.presigned_urls || [];
+      const objectName = transformed.objectName || transformed.object_name;
 
       if (presignedUrls.length !== actualParts) {
         throw new D3UploadError(
@@ -201,42 +183,46 @@ export class D3Client {
         );
       }
 
-      // Step 2: Upload file parts
+      if (!uploadId) {
+        throw new D3UploadError("Upload ID not received from server");
+      }
+
+      // Step 2: Upload file parts and capture ETags
       const chunkSizePerPart = Math.ceil(fileSize / actualParts);
       let bytesUploaded = 0;
+      const uploadParts: Array<{ etag: string; partNumber: number }> = [];
 
       // Prepare file data for chunking
-      let fileBuffer: any; // Buffer type from Node.js
-      if (typeof file === "string") {
-        // Read entire file into buffer for chunking
-        fileBuffer = fs.readFileSync(file);
-      } else if (
-        typeof Buffer !== "undefined" &&
-        Buffer.isBuffer &&
-        Buffer.isBuffer(file)
-      ) {
-        fileBuffer = file;
-      } else {
-        throw new D3ValidationError(
-          "Stream uploads are not supported. Please use file path or Buffer."
-        );
-      }
+      // Read entire file into memory for chunking (path-only uploads supported)
+      const fileBuffer = fs.readFileSync(file);
 
       for (let i = 0; i < actualParts; i++) {
         const start = i * chunkSizePerPart;
         const end = Math.min(start + chunkSizePerPart, fileSize);
         const partSize = end - start;
 
-        // Extract chunk from buffer
-        const chunk = fileBuffer.slice(start, end);
+        // Extract chunk from buffer (use subarray to avoid deprecated slice)
+        const chunk = fileBuffer.subarray(start, end);
 
-        // Upload chunk
-        await axios.put(presignedUrls[i], chunk, {
+        // Upload chunk and capture ETag from response headers
+        const putResponse = await axios.put(presignedUrls[i], chunk, {
           headers: {
             "Content-Type": detectedMimeType,
           },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
+        });
+
+        // Extract ETag from response (ETag may be quoted, so we'll store it as-is)
+        const etag =
+          putResponse.headers.etag || putResponse.headers["ETag"] || "";
+        if (!etag) {
+          throw new D3UploadError(`Failed to get ETag for part ${i + 1}`);
+        }
+
+        uploadParts.push({
+          etag: etag.replace(/^"|"$/g, ""), // Remove quotes if present
+          partNumber: i + 1,
         });
 
         bytesUploaded += partSize;
@@ -253,9 +239,49 @@ export class D3Client {
         }
       }
 
-      return { fileKey, presignedUrls };
+      // Step 3: Complete the multipart upload
+      try {
+        await this.axiosInstance.post<{
+          data: { message: string; file_key: string };
+        }>("/v1/biz/complete-upload", {
+          file_key: fileKey,
+          upload_id: uploadId,
+          object_name: objectName,
+          parts: uploadParts.map((part) => ({
+            etag: part.etag,
+            part_number: part.partNumber,
+          })),
+        });
+      } catch (completeError: any) {
+        if (
+          completeError instanceof DragdropdoError ||
+          completeError instanceof D3APIError
+        ) {
+          throw new D3UploadError(
+            `Failed to complete upload: ${completeError.message}`,
+            completeError
+          );
+        }
+        const message = completeError?.message || "Unknown error";
+        throw new D3UploadError(
+          `Failed to complete upload: ${message}`,
+          completeError
+        );
+      }
+
+      return {
+        file_key: fileKey,
+        upload_id: uploadId,
+        presigned_urls: presignedUrls,
+        object_name: objectName,
+        // Provide camelCase aliases for backward compatibility
+        fileKey: fileKey,
+        uploadId: uploadId,
+        presignedUrls: presignedUrls,
+        objectName: objectName,
+      };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
@@ -303,7 +329,7 @@ export class D3Client {
     try {
       const response = await this.axiosInstance.post<{
         data: SupportedOperationResponse;
-      }>("/v1/external/supported-operation", {
+      }>("/v1/biz/supported-operation", {
         ext: options.ext,
         action: options.action,
         parameters: options.parameters,
@@ -311,11 +337,11 @@ export class D3Client {
 
       return response.data.data;
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to check supported operation: ${message}`,
         undefined,
         undefined,
@@ -371,20 +397,25 @@ export class D3Client {
     try {
       const response = await this.axiosInstance.post<{
         data: OperationResponse;
-      }>("/v1/external/do", {
+      }>("/v1/biz/do", {
         action: options.action,
         file_keys: options.fileKeys,
         parameters: options.parameters,
         notes: options.notes,
       });
 
-      return response.data.data;
+      const rawData = response.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      return {
+        mainTaskId: transformed.mainTaskId || transformed.main_task_id,
+      };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to create operation: ${message}`,
         undefined,
         undefined,
@@ -549,21 +580,34 @@ export class D3Client {
     }
 
     try {
-      let url = `/v1/external/status/${options.mainTaskId}`;
+      let url = `/v1/biz/status/${options.mainTaskId}`;
       if (options.fileTaskId) {
         url += `/${options.fileTaskId}`;
       }
 
-      const response = await this.axiosInstance.get<{ data: StatusResponse }>(
-        url
-      );
-      return response.data.data;
+      const response = await this.axiosInstance.get<{ data: any }>(url);
+      const rawData = response.data.data;
+      // Transform snake_case to camelCase
+      const transformed = this.toCamelCase(rawData);
+      return {
+        operationStatus:
+          transformed.operationStatus || transformed.operation_status,
+        filesData: (transformed.filesData || transformed.files_data || []).map(
+          (file: any) => ({
+            fileKey: file.fileKey || file.file_key,
+            status: file.status,
+            downloadLink: file.downloadLink || file.download_link,
+            errorCode: file.errorCode || file.error_code,
+            errorMessage: file.errorMessage || file.error_message,
+          })
+        ),
+      };
     } catch (error: any) {
-      if (error instanceof D3ClientError || error instanceof D3APIError) {
+      if (error instanceof DragdropdoError || error instanceof D3APIError) {
         throw error;
       }
       const message = error?.message || "Unknown error";
-      throw new D3ClientError(
+      throw new DragdropdoError(
         `Failed to get status: ${message}`,
         undefined,
         undefined,
@@ -642,6 +686,33 @@ export class D3Client {
 
       poll();
     });
+  }
+
+  /**
+   * Convert snake_case object keys to camelCase
+   */
+  private toCamelCase(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.toCamelCase(item));
+    }
+    if (typeof obj === "object") {
+      const camelObj: any = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
+            letter.toUpperCase()
+          );
+          camelObj[camelKey] = this.toCamelCase(obj[key]);
+          // Also keep original key for backward compatibility
+          camelObj[key] = obj[key];
+        }
+      }
+      return camelObj;
+    }
+    return obj;
   }
 
   /**

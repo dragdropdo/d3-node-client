@@ -2,10 +2,10 @@
  * Type definitions for D3 Business API Client
  */
 
-export interface D3ClientConfig {
+export interface DragdropdoConfig {
   /** API key for authentication */
   apiKey: string;
-  /** Base URL of the D3 API (e.g., 'https://api.d3.com') */
+  /** Base URL of the D3 API (e.g., 'https://api-dev.dragdropdo.com') */
   baseURL?: string;
   /** Request timeout in milliseconds (default: 30000) */
   timeout?: number;
@@ -14,8 +14,8 @@ export interface D3ClientConfig {
 }
 
 export interface UploadFileOptions {
-  /** File path or Buffer (from Node.js) */
-  file: string | any; // Buffer type from Node.js
+  /** File path (absolute or relative) */
+  file: string;
   /** Original file name */
   fileName: string;
   /** MIME type of the file */
@@ -40,10 +40,22 @@ export interface UploadProgress {
 }
 
 export interface UploadResponse {
-  /** File key for use in operations */
+  /** File key for use in operations (snake_case from API) */
+  file_key: string;
+  /** Upload ID for completing the upload (snake_case from API) */
+  upload_id: string;
+  /** Presigned URLs for multipart upload (snake_case from API) */
+  presigned_urls: string[];
+  /** Object name returned by the API (snake_case from API) */
+  object_name?: string;
+  /** File key for use in operations (camelCase alias) */
   fileKey: string;
-  /** Presigned URLs for multipart upload */
+  /** Upload ID for completing the upload (camelCase alias) */
+  uploadId: string;
+  /** Presigned URLs for multipart upload (camelCase alias) */
   presignedUrls: string[];
+  /** Object name returned by the API (camelCase alias) */
+  objectName?: string;
 }
 
 export interface SupportedOperationOptions {

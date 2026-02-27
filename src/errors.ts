@@ -4,7 +4,7 @@
 
 import { D3Error } from "./types";
 
-export class D3ClientError extends Error implements D3Error {
+export class DragdropdoError extends Error implements D3Error {
   statusCode?: number;
   code?: number;
   details?: any;
@@ -16,7 +16,7 @@ export class D3ClientError extends Error implements D3Error {
     details?: any
   ) {
     super(message);
-    this.name = "D3ClientError";
+    this.name = "DragdropdoError";
     this.statusCode = statusCode;
     this.code = code;
     this.details = details;
@@ -27,7 +27,7 @@ export class D3ClientError extends Error implements D3Error {
   }
 }
 
-export class D3APIError extends D3ClientError {
+export class D3APIError extends DragdropdoError {
   constructor(
     message: string,
     statusCode: number,
@@ -39,21 +39,21 @@ export class D3APIError extends D3ClientError {
   }
 }
 
-export class D3ValidationError extends D3ClientError {
+export class D3ValidationError extends DragdropdoError {
   constructor(message: string, details?: any) {
     super(message, 400, undefined, details);
     this.name = "D3ValidationError";
   }
 }
 
-export class D3UploadError extends D3ClientError {
+export class D3UploadError extends DragdropdoError {
   constructor(message: string, details?: any) {
     super(message, undefined, undefined, details);
     this.name = "D3UploadError";
   }
 }
 
-export class D3TimeoutError extends D3ClientError {
+export class D3TimeoutError extends DragdropdoError {
   constructor(message: string = "Operation timed out") {
     super(message);
     this.name = "D3TimeoutError";
