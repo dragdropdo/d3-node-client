@@ -1,6 +1,6 @@
 # DragDropDo SDK - Node.js
 
-Official Node.js client library for the DragDropDo Business API. This library provides a simple and elegant interface for developers to interact with DragDropDo's file processing services at [dragdropdo.com](https://dragdropdo.com).
+Official Node.js client library for the dragdropdo.com Business API. This library provides a simple and elegant interface for developers to interact with DragDropDo's file processing services at [dragdropdo.com](https://dragdropdo.com).
 
 ## Features
 

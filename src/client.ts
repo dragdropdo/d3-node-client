@@ -1,7 +1,7 @@
 /**
- * D3 Business API Client
+ * dragdropdo.com Business API Client
  *
- * A Node.js client library for interacting with the D3 Business API.
+ * A Node.js client library for interacting with the dragdropdo.com Business API.
  * Provides methods for file uploads, operations, and status checking.
  */
 
@@ -40,14 +40,14 @@ export class Dragdropdo {
   private axiosInstance: AxiosInstance;
 
   /**
-   * Create a new D3 Client instance
+   * Create a new DragDropDo Client instance
    *
    * @param config - Client configuration
    * @example
    * ```typescript
    * const client = new Dragdropdo({
    *   apiKey: 'your-api-key',
-   *   baseURL: 'https://api-dev.dragdropdo.com',
+   *   baseURL: 'https://dragdropdo.com',
    *   timeout: 30000
    * });
    * ```
@@ -58,7 +58,7 @@ export class Dragdropdo {
     }
 
     this.apiKey = config.apiKey;
-    this.baseURL = config.baseURL || "https://api-dev.dragdropdo.com";
+    this.baseURL = config.baseURL || "https://dragdropdo.com";
     this.timeout = config.timeout || 30000;
 
     // Remove trailing slash from baseURL

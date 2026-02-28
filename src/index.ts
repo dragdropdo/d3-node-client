@@ -1,7 +1,7 @@
 /**
  * DragDropDo SDK - Node.js Client Library
  *
- * Official Node.js client for the D3 Business API
+ * Official Node.js client for the dragdropdo.com Business API
  */
 
 export { Dragdropdo } from "./client";

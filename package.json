@@ -1,7 +1,7 @@
 {
   "name": "dragdropdo-sdk",
   "version": "1.0.0",
-  "description": "Official Node.js client library for the D3 Business API",
+  "description": "Official Node.js client library for the dragdropdo.com Business API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

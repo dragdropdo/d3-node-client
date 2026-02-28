@@ -1,5 +1,5 @@
 /**
- * Type definitions for D3 Business API Client
+ * Type definitions for dragdropdo.com Business API Client
  */
 
 export interface DragdropdoConfig {

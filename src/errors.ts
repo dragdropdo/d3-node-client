@@ -1,5 +1,5 @@
 /**
- * Custom error classes for D3 Client
+ * Custom error classes for dragdropdo.com Business API Client
  */
 
 import { D3Error } from "./types";
