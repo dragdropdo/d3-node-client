@@ -1,6 +1,6 @@
 # DragDropDo SDK - Node.js
 
-Official Node.js client library for the D3 Business API. This library provides a simple and elegant interface for developers to interact with D3's file processing services.
+Official Node.js client library for the DragDropDo Business API. This library provides a simple and elegant interface for developers to interact with DragDropDo's file processing services at [dragdropdo.com](https://dragdropdo.com).
 
 ## Features
 
@@ -26,7 +26,7 @@ import { Dragdropdo } from "dragdropdo-sdk";
 // Initialize the client
 const client = new Dragdropdo({
   apiKey: "your-api-key-here",
-  baseURL: "https://api.d3.com", // Optional, defaults to https://api.d3.com
+  baseURL: "https://dragdropdo.com", // Optional, defaults to https://dragdropdo.com
   timeout: 30000, // Optional, defaults to 30000ms
 });
 
@@ -79,7 +79,7 @@ Create a new D3 client instance.
 **Parameters:**
 
 - `config.apiKey` (required) - Your D3 API key
-- `config.baseURL` (optional) - Base URL of the D3 API (default: `'https://api.d3.com'`)
+- `config.baseURL` (optional) - Base URL of the DragDropDo API (default: `'https://dragdropdo.com'`)
 - `config.timeout` (optional) - Request timeout in milliseconds (default: `30000`)
 - `config.headers` (optional) - Custom headers to include in all requests
 
@@ -88,7 +88,7 @@ Create a new D3 client instance.
 ```typescript
 const client = new Dragdropdo({
   apiKey: "your-api-key",
-  baseURL: "https://api.d3.com",
+  baseURL: "https://dragdropdo.com",
   timeout: 30000,
 });
 ```
@@ -383,7 +383,7 @@ async function processFile() {
   // Initialize client
   const client = new Dragdropdo({
     apiKey: process.env.D3_API_KEY!,
-    baseURL: "https://api.d3.com",
+    baseURL: "https://dragdropdo.com",
   });
 
   try {
@@ -632,4 +632,4 @@ ISC
 
 ## Support
 
-For API documentation and support, visit [D3 Developer Portal](https://developer.d3.com).
+For API documentation and support, visit [dragdropdo.com](https://dragdropdo.com) or the [D3 Developer Portal](https://developer.d3.com).
