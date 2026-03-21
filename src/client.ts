@@ -161,7 +161,7 @@ export class Dragdropdo {
       // Step 1: Request presigned URLs
       const uploadResponse = await this.axiosInstance.post<{
         data: UploadResponse;
-      }>("/v1/biz/initiate-upload", {
+      }>("/api/v1/initiate-upload", {
         file_name: fileName,
         size: fileSize,
         mime_type: detectedMimeType,
@@ -243,7 +243,7 @@ export class Dragdropdo {
       try {
         await this.axiosInstance.post<{
           data: { message: string; file_key: string };
-        }>("/v1/biz/complete-upload", {
+        }>("/api/v1/complete-upload", {
           file_key: fileKey,
           upload_id: uploadId,
           object_name: objectName,
@@ -329,7 +329,7 @@ export class Dragdropdo {
     try {
       const response = await this.axiosInstance.post<{
         data: SupportedOperationResponse;
-      }>("/v1/biz/supported-operation", {
+      }>("/api/v1/supported-operation", {
         ext: options.ext,
         action: options.action,
         parameters: options.parameters,
@@ -397,7 +397,7 @@ export class Dragdropdo {
     try {
       const response = await this.axiosInstance.post<{
         data: OperationResponse;
-      }>("/v1/biz/do", {
+      }>("/api/v1/do", {
         action: options.action,
         file_keys: options.fileKeys,
         parameters: options.parameters,
@@ -580,7 +580,7 @@ export class Dragdropdo {
     }
 
     try {
-      let url = `/v1/biz/status/${options.mainTaskId}`;
+      let url = `/api/v1/status/${options.mainTaskId}`;
       if (options.fileTaskId) {
         url += `/${options.fileTaskId}`;
       }
@@ -589,13 +589,16 @@ export class Dragdropdo {
       const rawData = response.data.data;
       // Transform snake_case to camelCase
       const transformed = this.toCamelCase(rawData);
+      const rawStatus = (
+        transformed.operationStatus || transformed.operation_status || ""
+      ).toLowerCase();
+
       return {
-        operationStatus:
-          transformed.operationStatus || transformed.operation_status,
+        operationStatus: rawStatus,
         filesData: (transformed.filesData || transformed.files_data || []).map(
           (file: any) => ({
             fileKey: file.fileKey || file.file_key,
-            status: file.status,
+            status: (file.status || "").toLowerCase(),
             downloadLink: file.downloadLink || file.download_link,
             errorCode: file.errorCode || file.error_code,
             errorMessage: file.errorMessage || file.error_message,

@@ -40,7 +40,7 @@ describe("Dragdropdo end-to-end (mocked HTTP)", () => {
     };
 
     nock(API_BASE)
-      .post("/v1/external/upload", (body) => {
+      .post("/api/v1/initiate-upload", (body) => {
         return (
           body.file_name === "test.pdf" &&
           body.size === 6 * 1024 * 1024 &&
@@ -67,7 +67,7 @@ describe("Dragdropdo end-to-end (mocked HTTP)", () => {
       .reply(200, {}, { ETag: '"etag-part-2"' });
 
     nock(API_BASE)
-      .post("/v1/external/complete-upload", (body) => {
+      .post("/api/v1/complete-upload", (body) => {
         return (
           body.file_key === "file-key-123" &&
           body.upload_id === "upload-id-456" &&
@@ -107,7 +107,7 @@ describe("Dragdropdo end-to-end (mocked HTTP)", () => {
     const client = new Dragdropdo({ apiKey: "test-key", baseURL: API_BASE });
 
     nock(API_BASE)
-      .post("/v1/external/do", {
+      .post("/api/v1/do", {
         action: "convert",
         file_keys: ["file-key-123"],
         parameters: { convert_to: "png" },
@@ -116,14 +116,14 @@ describe("Dragdropdo end-to-end (mocked HTTP)", () => {
       .reply(200, { data: { mainTaskId: "task-123" } });
 
     nock(API_BASE)
-      .get("/v1/external/status/task-123")
+      .get("/api/v1/status/task-123")
       .reply(200, {
         data: {
           operationStatus: "queued",
           filesData: [{ fileKey: "file-key-123", status: "queued" }],
         },
       })
-      .get("/v1/external/status/task-123")
+      .get("/api/v1/status/task-123")
       .reply(200, {
         data: {
           operationStatus: "completed",

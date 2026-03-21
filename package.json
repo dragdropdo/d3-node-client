@@ -19,6 +19,7 @@
     "convert",
     "compress"
   ],
+  "homepage": "https://dragdropdo.com",
   "author": "TrippyTech Labs LLP",
   "license": "ISC",
   "dependencies": {
