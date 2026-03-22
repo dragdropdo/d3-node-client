@@ -489,20 +489,6 @@ export class Dragdropdo {
   }
 
   /**
-   * Share files (generate shareable links)
-   */
-  async share(
-    fileKeys: string[],
-    notes?: Record<string, string>
-  ): Promise<OperationResponse> {
-    return this.createOperation({
-      action: "share",
-      fileKeys,
-      notes,
-    });
-  }
-
-  /**
    * Lock PDF with password
    */
   async lockPdf(
@@ -567,10 +553,10 @@ export class Dragdropdo {
    *   mainTaskId: 'task-123'
    * });
    *
-   * // Get specific file task status
+   * // Get specific file status by file key
    * const status = await client.getStatus({
    *   mainTaskId: 'task-123',
-   *   fileTaskId: 'file-task-456'
+   *   fileKey: 'file-key-456'
    * });
    * ```
    */
@@ -581,8 +567,8 @@ export class Dragdropdo {
 
     try {
       let url = `/api/v1/status/${options.mainTaskId}`;
-      if (options.fileTaskId) {
-        url += `/${options.fileTaskId}`;
+      if (options.fileKey) {
+        url += `/${options.fileKey}`;
       }
 
       const response = await this.axiosInstance.get<{ data: any }>(url);
@@ -644,7 +630,7 @@ export class Dragdropdo {
   async pollStatus(options: PollStatusOptions): Promise<StatusResponse> {
     const {
       mainTaskId,
-      fileTaskId,
+      fileKey,
       interval = 2000,
       timeout = 300000,
       onUpdate,
@@ -662,7 +648,7 @@ export class Dragdropdo {
           }
 
           // Get status
-          const status = await this.getStatus({ mainTaskId, fileTaskId });
+          const status = await this.getStatus({ mainTaskId, fileKey });
 
           // Call update callback
           if (onUpdate) {

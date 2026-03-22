@@ -145,7 +145,7 @@ Create a file processing operation.
 ```typescript
 {
   action: 'convert' | 'compress' | 'merge' | 'zip' | 'create_zip' |
-          'share' | 'lock' | 'unlock' | 'reset_password'; // Required
+          'lock' | 'unlock' | 'reset_password'; // Required
   fileKeys: string[];        // Required: Array of file keys
   parameters?: {             // Optional: Action-specific parameters
     convert_to?: string;
@@ -259,25 +259,6 @@ await client.zip(["file-key-1", "file-key-2"]);
 
 ---
 
-### `share(fileKeys, notes?)`
-
-Generate shareable links for files.
-
-**Parameters:**
-
-- `fileKeys: string[]` - Array of file keys
-- `notes?: Record<string, string>` - Optional user metadata
-
-**Returns:** `Promise<OperationResponse>`
-
-**Example:**
-
-```typescript
-await client.share(["file-key-123"]);
-```
-
----
-
 ### `lockPdf(fileKeys, password, notes?)`
 
 Protect PDF with password.
@@ -350,7 +331,7 @@ Get current status of an operation.
 ```typescript
 {
   mainTaskId: string;        // Required: Main task ID
-  fileTaskId?: string;       // Optional: Specific file task ID
+  fileKey?: string;          // Optional: Input file key for specific file status
 }
 ```
 
@@ -374,7 +355,7 @@ Get current status of an operation.
 ```typescript
 const status = await client.getStatus({
   mainTaskId: "task-123",
-  fileTaskId: "file-task-456", // optional
+  fileKey: "file-key-456", // optional
 });
 ```
 
@@ -389,7 +370,7 @@ Poll operation status until completion or failure.
 ```typescript
 {
   mainTaskId: string;        // Required: Main task ID
-  fileTaskId?: string;       // Optional: Specific file task ID
+  fileKey?: string;          // Optional: Input file key for specific file status
   interval?: number;         // Optional: Polling interval in ms (default: 2000)
   timeout?: number;          // Optional: Max duration in ms (default: 300000)
   onUpdate?: (status: StatusResponse) => void; // Optional: Update callback
@@ -452,12 +433,11 @@ try {
 | `compress()`                | Compress files     | `fileKeys`, `compressionValue?`          |
 | `merge()`                   | Merge files        | `fileKeys`                               |
 | `zip()`                     | Create ZIP         | `fileKeys`                               |
-| `share()`                   | Share files        | `fileKeys`                               |
 | `lockPdf()`                 | Lock PDF           | `fileKeys`, `password`                   |
 | `unlockPdf()`               | Unlock PDF         | `fileKeys`, `password`                   |
 | `resetPdfPassword()`        | Reset PDF password | `fileKeys`, `oldPassword`, `newPassword` |
-| `getStatus()`               | Get status         | `mainTaskId`, `fileTaskId?`              |
-| `pollStatus()`              | Poll until done    | `mainTaskId`, `interval?`, `timeout?`    |
+| `getStatus()`               | Get status         | `mainTaskId`, `fileKey?`                 |
+| `pollStatus()`              | Poll until done    | `mainTaskId`, `fileKey?`, `interval?`, `timeout?` |
 
 ---
 

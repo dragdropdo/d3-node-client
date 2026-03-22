@@ -81,14 +81,13 @@ export interface SupportedOperationResponse {
 }
 
 export interface OperationOptions {
-  /** Action to perform: 'convert', 'compress', 'merge', 'zip', 'share', 'lock', 'unlock', 'reset_password' */
+  /** Action to perform: 'convert', 'compress', 'merge', 'zip', 'lock', 'unlock', 'reset_password' */
   action:
     | "convert"
     | "compress"
     | "merge"
     | "zip"
     | "create_zip"
-    | "share"
     | "lock"
     | "unlock"
     | "reset_password";
@@ -121,8 +120,8 @@ export interface OperationResponse {
 export interface StatusOptions {
   /** Main task ID */
   mainTaskId: string;
-  /** Optional file task ID for specific file status */
-  fileTaskId?: string;
+  /** Optional input file key for specific file status */
+  fileKey?: string;
 }
 
 export interface FileTaskStatus {

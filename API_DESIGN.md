@@ -131,7 +131,6 @@ const valid = await client.checkSupportedOperation({
 - `compress`: Compress files
 - `merge`: Merge multiple files
 - `zip`: Create ZIP archives
-- `share`: Generate shareable links
 - `lock`: Protect PDFs with password
 - `unlock`: Remove PDF password protection
 - `reset_password`: Change PDF password
@@ -159,7 +158,6 @@ const result = await client.createOperation({
 - `compress(fileKeys, compressionValue?, notes?)`
 - `merge(fileKeys, notes?)`
 - `zip(fileKeys, notes?)`
-- `share(fileKeys, notes?)`
 - `lockPdf(fileKeys, password, notes?)`
 - `unlockPdf(fileKeys, password, notes?)`
 - `resetPdfPassword(fileKeys, oldPassword, newPassword, notes?)`
@@ -195,7 +193,7 @@ await client.merge(["file-key-1", "file-key-2"]);
 
 **Design Decisions**:
 
-- **Single method with optional fileTaskId**: Handles both use cases
+- **Single method with optional fileKey**: Handles both use cases
 - **Structured response**: Easy to parse and display
 
 **Example**:
@@ -203,7 +201,7 @@ await client.merge(["file-key-1", "file-key-2"]);
 ```typescript
 const status = await client.getStatus({
   mainTaskId: "task-123",
-  fileTaskId: "file-task-456", // optional
+  fileKey: "file-key-456", // optional
 });
 ```
 
@@ -329,7 +327,6 @@ All types are exported for use in developer code:
 | `compress()`                | Compress files             | `OperationResponse`              |
 | `merge()`                   | Merge files                | `OperationResponse`              |
 | `zip()`                     | Create ZIP archive         | `OperationResponse`              |
-| `share()`                   | Generate shareable links   | `OperationResponse`              |
 | `lockPdf()`                 | Protect PDF with password  | `OperationResponse`              |
 | `unlockPdf()`               | Remove PDF password        | `OperationResponse`              |
 | `resetPdfPassword()`        | Change PDF password        | `OperationResponse`              |

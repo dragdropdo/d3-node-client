@@ -30,7 +30,7 @@ dragdropdo-sdk/
 
 - ✅ File upload with multipart support
 - ✅ Operation support checking
-- ✅ All operation types (convert, compress, merge, zip, share, lock, unlock, reset_password)
+- ✅ All operation types (convert, compress, merge, zip, lock, unlock, reset_password)
 - ✅ Status checking and polling
 - ✅ Error handling
 
@@ -65,10 +65,9 @@ dragdropdo-sdk/
 7. **`compress(fileKeys, compressionValue?, notes?)`** - Compress files
 8. **`merge(fileKeys, notes?)`** - Merge files
 9. **`zip(fileKeys, notes?)`** - Create ZIP archives
-10. **`share(fileKeys, notes?)`** - Generate shareable links
-11. **`lockPdf(fileKeys, password, notes?)`** - Protect PDFs
-12. **`unlockPdf(fileKeys, password, notes?)`** - Remove PDF protection
-13. **`resetPdfPassword(fileKeys, oldPassword, newPassword, notes?)`** - Change PDF password
+10. **`lockPdf(fileKeys, password, notes?)`** - Protect PDFs
+11. **`unlockPdf(fileKeys, password, notes?)`** - Remove PDF protection
+12. **`resetPdfPassword(fileKeys, oldPassword, newPassword, notes?)`** - Change PDF password
 
 ## Typical Workflow
 

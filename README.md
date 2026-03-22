@@ -193,7 +193,7 @@ Create a file operation (convert, compress, merge, zip, etc.).
 
 **Parameters:**
 
-- `options.action` (required) - Action to perform: `'convert'`, `'compress'`, `'merge'`, `'zip'`, `'share'`, `'lock'`, `'unlock'`, `'reset_password'`
+- `options.action` (required) - Action to perform: `'convert'`, `'compress'`, `'merge'`, `'zip'`, `'lock'`, `'unlock'`, `'reset_password'`
 - `options.fileKeys` (required) - Array of file keys from upload
 - `options.parameters` (optional) - Action-specific parameters
 - `options.notes` (optional) - User metadata
@@ -257,13 +257,6 @@ await client.zip(fileKeys, notes?);
 // Example: await client.zip(['file-key-1', 'file-key-2']);
 ```
 
-**Share:**
-
-```typescript
-await client.share(fileKeys, notes?);
-// Example: await client.share(['file-key-123']);
-```
-
 **Lock PDF:**
 
 ```typescript
@@ -296,7 +289,7 @@ Get the current status of an operation.
 **Parameters:**
 
 - `options.mainTaskId` (required) - Main task ID from operation creation
-- `options.fileTaskId` (optional) - Specific file task ID
+- `options.fileKey` (optional) - Input file key for specific file status
 
 **Returns:** `Promise<StatusResponse>` with operation and file statuses
 
@@ -308,10 +301,10 @@ const status = await client.getStatus({
   mainTaskId: "task-123",
 });
 
-// Get specific file task status
+// Get specific file status by file key
 const status = await client.getStatus({
   mainTaskId: "task-123",
-  fileTaskId: "file-task-456",
+  fileKey: "file-key-456",
 });
 
 console.log("Operation status:", status.operationStatus);
@@ -334,7 +327,7 @@ Poll operation status until completion or failure.
 **Parameters:**
 
 - `options.mainTaskId` (required) - Main task ID
-- `options.fileTaskId` (optional) - Specific file task ID
+- `options.fileKey` (optional) - Input file key for specific file status
 - `options.interval` (optional) - Polling interval in milliseconds (default: `2000`)
 - `options.timeout` (optional) - Maximum polling duration in milliseconds (default: `300000` = 5 minutes)
 - `options.onUpdate` (optional) - Callback for each status update
@@ -541,16 +534,6 @@ Create a ZIP archive from multiple files.
 
 ```typescript
 await client.zip(["file-key-1", "file-key-2"]);
-```
-
-### Share
-
-Generate shareable links for files.
-
-**Example:**
-
-```typescript
-await client.share(["file-key-123"]);
 ```
 
 ### Lock PDF
