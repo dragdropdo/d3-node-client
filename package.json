@@ -2,11 +2,19 @@
   "name": "dragdropdo-sdk",
   "version": "1.0.2",
   "description": "Official Node.js client library for the dragdropdo.com Business API",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build",
+    "build": "rm -rf dist && tsc",
+    "prepublishOnly": "npm run build && npm run verify",
+    "verify": "node -e \"require('fs').accessSync('dist/index.js'); require('fs').accessSync('dist/index.d.ts'); require('./dist/index.js');\"",
     "test": "jest"
   },
   "keywords": [
